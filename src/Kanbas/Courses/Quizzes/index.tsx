@@ -21,6 +21,7 @@ export default function Quizzes () {
     const { currentUser } = useSelector((state:any) => state.accountReducer);
     const dispatch = useDispatch();
 
+    const currentQuiz = quizzes.filter((q:any) => q.course===cid);
     const ConvertToDate = (date:any) =>{
       if(date instanceof Date) {
         return date;
@@ -74,7 +75,7 @@ export default function Quizzes () {
               <strong>Assginment Quizzes</strong>
             </div>
             
-            {quizzes && quizzes.length > 0 && <>
+            {currentQuiz && currentQuiz.length > 0 && <>
             <ul className="wd-inquizzes list-group rounded-0">
               {quizzes
                  .filter((quiz: any) => quiz.course === cid)
@@ -122,7 +123,7 @@ export default function Quizzes () {
             </ul> 
             </>} 
           </li>
-          {quizzes.length === 0 && <h3>Click Add Quiz button at the top to create quiz</h3>}
+          {(!currentQuiz || currentQuiz.length === 0) && <h3>Click Add Quiz button at the top to create quiz</h3>}
         </ul>
         </>
         }

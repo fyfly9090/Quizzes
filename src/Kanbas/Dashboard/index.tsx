@@ -20,8 +20,7 @@ export default function Dashboard({ courses, course, setCourse, addNewCourse,
       dispatch(setEnrollments(enrollments));
      }
    
-     
-     const currentEnrollments = enrollments.filter((e:any)=>e.user===currentUser.loginId);
+     const currentEnrollments = enrollments.filter((e:any)=>e.user===currentUser._id&&currentUser._id);
      
      const registeredCourses = [];
      for(let i = 0; i < currentEnrollments.length; i++) {
@@ -76,7 +75,7 @@ export default function Dashboard({ courses, course, setCourse, addNewCourse,
               {error && <div className="wd-error alert alert-danger">{error}</div>}
               <button className="btn btn-primary float-end"
                   id="wd-add-new-course-click"
-                  onClick={()=>{addNewCourse();createEnrollment({user:currentUser.loginId,course:courseNum})}} > Add </button>
+                  onClick={()=>{addNewCourse();createEnrollment({user:currentUser._id,course:courseNum})}} > Add </button>
               <button className="btn btn-warning float-end me-2"
                 onClick={updateCourse} id="wd-update-course-click">
                 Update
@@ -109,7 +108,7 @@ export default function Dashboard({ courses, course, setCourse, addNewCourse,
                             <button onClick={(event) => {
                                      event.preventDefault();
                                      deleteCourse(course._id);
-                                     removeEnrollment(course._id, currentUser.loginId)
+                                     removeEnrollment(course._id, currentUser._id)
                                      }} className="btn btn-danger float-end"
                                      id="wd-delete-course-click">
                                      Delete

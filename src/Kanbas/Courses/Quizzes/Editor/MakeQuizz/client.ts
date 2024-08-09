@@ -3,7 +3,7 @@ const REMOTE_SERVER = process.env.REACT_APP_REMOTE_SERVER;
 const QUIZ_API = `${REMOTE_SERVER}/api/quizzes`;
 const QUESTION_API = `${REMOTE_SERVER}/api/questions`;
 
-export const findQuestionsForQuiz = async(quizId: string) => {
+export const findQuestionsByQuiz = async(quizId: string) => {
     const response = await axios.get(`${QUIZ_API}/${quizId}/questions`);
     return response.data;
 }

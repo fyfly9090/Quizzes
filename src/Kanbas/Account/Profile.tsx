@@ -1,12 +1,15 @@
 import * as client from "./client";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { setCurrentUser } from "./accountrReducer";
+import { useDispatch, useSelector } from "react-redux";
+import { setCurrentUser, updateCurrentUser } from "./accountrReducer";
 import * as userClient from "../Courses/People/client"
 
+
 export default function Profile() {
-  const [profile, setProfile] = useState<any>({});
+  
+  const { currentUser } = useSelector((state:any) => state.accountReducer);
+  const [profile, setProfile] = useState<any>(currentUser);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const fetchProfile = async () => {
@@ -17,16 +20,18 @@ export default function Profile() {
       navigate("/Kanbas/Account/Signin");
     }
   };
-  
+
   const signout = async () => {
     await client.signout();
     dispatch(setCurrentUser(null));
     navigate("/Kanbas/Account/Signin");
   };
-  const saveUser = async(user:any) => {
-    const status = await userClient.updateUser(user);
-    dispatch(setCurrentUser(status));
+  const saveUser = async() => {
+    const status = await userClient.updateUser(profile);
+    dispatch(updateCurrentUser(profile));
+    dispatch(setCurrentUser(profile));
   }
+
 
   useEffect(() => { 
     fetchProfile(); }, []);
@@ -68,11 +73,12 @@ export default function Profile() {
          <div className="row mb-2">
          <label htmlFor="rl" className = "me-2 col-1">Your role</label>
          <select id = "rl" className="wd-role profile-style col-2" onChange={(e) => setProfile({ ...profile, role: e.target.value })}>
-           <option value="FACULTY">Faculty</option>      <option value="STUDENT">Student</option>
+           <option value="FACULTY" selected = {profile.role==="FACULTY"}>Faculty</option>      
+           <option value="STUDENT" selected = {profile.role==="STUDENT"}>Student</option>
          </select>
          </div>
          <div>
-         <button onClick={()=>saveUser(profile)} className="wd-signout-btn btn btn-primary width-style me-4">
+         <button onClick={()=>saveUser()} className="wd-signout-btn btn btn-primary width-style me-4">
            Save
          </button>
          <button onClick={signout} className="wd-signout-btn btn btn-danger width-style ms-5">

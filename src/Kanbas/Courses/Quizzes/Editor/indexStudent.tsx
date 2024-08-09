@@ -2,10 +2,9 @@ import { useSelector } from "react-redux"
 import { useParams } from "react-router-dom"
 import { useState } from "react";
 
-
-
 export default function StudentQuizDetails() {
   const { questions } = useSelector((state:any) => state.questionsReducer);
+
   console.log(questions)
   const {qid} = useParams();
   const questionsOfQuiz = questions.filter((q:any) => q.quiz===qid);
@@ -34,19 +33,19 @@ export default function StudentQuizDetails() {
     setCurrentQuestions(currentQuestions.map((q:any)=>q._id===question._id? question:q))
   }
  
-   
   const [stuPoints, setStuPoints] = useState(a);
   const setStudentPoints = () => {
     let points = 0;
     for(let i = 0; i <currentQuestions.length; i++ ) {
       const answers = currentQuestions[i].answers;
       for(let j = 0; j < answers.length; j++) {
-        console.log(currentQuestions[i].points)
+        
         if(answers[j].type==="Correct Answer" && currentQuestions[i].studentAnswer===answers[j].value) {
           points=points+parseInt(currentQuestions[i].points);
           break;
         }
       }
+      console.log(points)
     }
     setStuPoints(points);
   }
@@ -57,7 +56,7 @@ export default function StudentQuizDetails() {
               <span className="ms-2">{stuPoints}</span>
             </div>}
            
-            {currentQuestions && currentQuestions.length>0 &&
+          {currentQuestions && currentQuestions.length>0 &&
             <>
             <div className="m-5">
               

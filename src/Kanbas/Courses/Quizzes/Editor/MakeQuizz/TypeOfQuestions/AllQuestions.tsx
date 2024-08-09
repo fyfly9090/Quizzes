@@ -42,6 +42,7 @@ export default function AllQuestions({currentAnswers, answer, setAnswer, addAnsw
     const createQuestion = async(question:any) => {
       const newQuestion = await client.createQuestion(qid as string, question);
       dispatch(addQuestion(newQuestion));
+      console.log(newQuestion);
     }
     
     useEffect(() => {

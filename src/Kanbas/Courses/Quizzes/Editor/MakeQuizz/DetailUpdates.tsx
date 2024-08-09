@@ -45,6 +45,7 @@ export default function QuizUpdates() {
     
 
     if(cur && cur._id !== "0") {
+        
         title = cur.title;
         instruction = cur.instruction;
         type = cur.type;
@@ -80,7 +81,7 @@ export default function QuizUpdates() {
     const [newTimeLimit, setNewTimeLimit] = useState(timeLimit===true? true:timeLimit);
     const [newDue, setNewDue] = useState(due===""? "":due);
     const [newAvailable, setNewAvailable] = useState(available===""? "":available);
-    const [newId, setNewId] = useState("0");    
+    const [newId, setNewId] = useState(params.qid==="0"?"0":params.qid);    
 
     const saveQuiz = async(quiz:any) => {
         const status = await client.updateQuiz(quiz);
@@ -90,9 +91,13 @@ export default function QuizUpdates() {
     const createQuiz = async(quiz:any) => {
        const newQuiz = await client.createQuiz(cid as string, quiz);
        dispatch(addQuiz(newQuiz)); 
+       console.log(newQuiz._id)
+       /* console.log(typeof newQuiz._id)
+       console.log(typeof newId) */
        setNewId(newQuiz._id);
-
+       console.log(newId);
     }
+
 
 
     return (
@@ -295,7 +300,7 @@ export default function QuizUpdates() {
                         saveQuiz({_id:id, title:newTitle, course: cid, instruction: newInstruction, 
                             type: newType, group: newGroup, shuffle: newShuffle, multiple: newMultiple, code: newCode, oneQuestion: newOneQuestion,
                             webcam: newWebcam, lockQustion: newLockQuestion, time: newTime, timeLimit: newTimeLimit, due:newDue, 
-                            available:newAvailable})}}>
+                            available:newAvailable});console.log(newId)}}>
                                <Link key={id} to={`/Kanbas/Courses/${cid}/Quizzes/${newId}`} className="text-decoration-none text-black">
                                 Save
                                 </Link>

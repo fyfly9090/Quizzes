@@ -1,7 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { addEnrollment, deleteEnrollment, setEnrollments } from "./registerReducer";
 import * as client from "./client";
-import { setAssignments } from "../Courses/Assignments/assignmentsReducer";
 import { useEffect } from "react";
 
 export default function RegisterCourses({courses}:{courses:any[]}) {
@@ -16,12 +15,7 @@ export default function RegisterCourses({courses}:{courses:any[]}) {
       fetchEnrollments();
     },[])
    
-    console.log(enrollments)
-    const currentEnrollments = enrollments.filter((e:any)=>e.user===currentUser.loginId);
-    console.log(currentEnrollments)
-
-   
-   
+    const currentEnrollments = enrollments.filter((e:any)=>e.user===currentUser._id);
 
     const createEnrollment = async(enrollment:any) => {
       const newEnrollment = await client.createEnrollment(enrollment);
@@ -56,7 +50,7 @@ export default function RegisterCourses({courses}:{courses:any[]}) {
                       <p className="wd-dashboard-course-title card-text" style={{ maxHeight: 53, overflow: "hidden" }}>
                        {course.description}</p>
                       <button onClick={() => {
-                                createEnrollment({_id:"0", user:currentUser.loginId, course:course.number}); 
+                                createEnrollment({_id:"0", user:currentUser._id, course:course.number}); 
                               }}
                               className="btn btn-warning me-2 float-end">
                               Register  
@@ -79,7 +73,7 @@ export default function RegisterCourses({courses}:{courses:any[]}) {
                       <p className="wd-dashboard-course-title card-text" style={{ maxHeight: 53, overflow: "hidden" }}>
                        {course.description}</p>
                       <button onClick={() => {
-                               removeEnrollment(course.number, currentUser.loginId);
+                               removeEnrollment(course.number, currentUser._id);
                                }} className="btn btn-danger float-end"
                                id="wd-delete-course-click">
                                Unregister

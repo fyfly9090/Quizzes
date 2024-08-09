@@ -16,13 +16,12 @@ import * as qtClient from "./client";
 export default function Questions({qPoints, noOfQuestions} : {qPoints:number, noOfQuestions:number}) {
   const params = useParams();  
   const cid = params.cid;
-    const quizId = params.qid === "0"? new Date().getTime().toString(): params.qid as string;
-    console.log(quizId)
+    const quizId = params.qid === "0"? "0": params.qid as string;
+    
     const { questions } = useSelector((state:any) => state.questionsReducer);
     const { quizzes } =useSelector((state:any) => state.quizzesReducer);
     const dispatch = useDispatch();
     const qz = quizzes.find((q:any) => q._id===quizId);
-    console.log(questions)
     
     const [answer, setAnswer] = useState<any>({
         _id:"0", type:"Possible Answer", value:"4"
@@ -83,7 +82,7 @@ export default function Questions({qPoints, noOfQuestions} : {qPoints:number, no
     }
 
     const fetchQuestions = async() => {
-      const questions = await qtClient.findQuestionsForQuiz(quizId as string);
+      const questions = await qtClient.findQuestionsByQuiz(quizId as string);
       dispatch(setQuestions(questions));
     }
 
@@ -114,7 +113,7 @@ export default function Questions({qPoints, noOfQuestions} : {qPoints:number, no
                     <div className="float-end"><span className="me-2">Points:</span>{qt.points}</div><br/>
                     <div>
                      {qt.description}
-                     <CiEdit className="float-end fs-4" onClick={()=>{dispatch(editQuestion(qt._id));console.log(qt.answers)}} />
+                     <CiEdit className="float-end fs-4" onClick={()=>{dispatch(editQuestion(qt._id))}} />
                      <RiDeleteBin5Line className="float-end fs-4" onClick={()=>removeQuestion(qt._id)}/>
                      <ul className="list-group mt-3">
                         {qt.answers && (qt.type !=="TrueFalse") && qt.answers
@@ -134,7 +133,7 @@ export default function Questions({qPoints, noOfQuestions} : {qPoints:number, no
                     <>
                     <li className="list-group-item p-5">
                         <div className="float-end"><span className="me-2">Points:</span>
-                          <input value={qt.points} onChange={(e)=>saveQuestion({...qt, points: e.target.value})}/>                    
+                          <input value={qt.points} onChange={(e)=>{saveQuestion({...qt, points: e.target.value});console.log(e.target.value)}}/>                    
                         </div><br/> <br/>                     
                         <input className="answer-label-style"
                           onChange={(e) => saveQuestion({...qt, description: e.target.value})} 

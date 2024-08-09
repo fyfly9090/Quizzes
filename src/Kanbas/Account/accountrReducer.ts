@@ -9,7 +9,10 @@ const accountSlice = createSlice({
     setCurrentUser: (state, action) => {
       state.currentUser = action.payload;
     },
+    updateCurrentUser: (state, {payload: user}) => {
+      state.currentUser = user;
+    }
   },
 });
-export const { setCurrentUser } = accountSlice.actions;
+export const { setCurrentUser, updateCurrentUser } = accountSlice.actions;
 export default accountSlice.reducer;
