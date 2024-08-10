@@ -12,7 +12,7 @@ import QuizAction from "./QuizAction";
 import * as client from "./client";
 import { setQuizzes } from "./quizzesReducer";
 import * as userClient from "../../Account/client";
-import { setCurrentUser } from "../../Account/accountrReducer";
+import { setCurrentUser } from "../../Account/accountReducer";
 import { AiOutlineStop } from "react-icons/ai";
 
 export default function Quizzes () {

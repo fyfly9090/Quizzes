@@ -2,14 +2,13 @@ import * as client from "./client";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setCurrentUser, updateCurrentUser } from "./accountrReducer";
+import { setCurrentUser, updateCurrentUser } from "./accountReducer";
 import * as userClient from "../Courses/People/client"
 
 
 export default function Profile() {
   
-  const { currentUser } = useSelector((state:any) => state.accountReducer);
-  const [profile, setProfile] = useState<any>(currentUser);
+  const [profile, setProfile] = useState<any>({});
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const fetchProfile = async () => {
@@ -29,7 +28,7 @@ export default function Profile() {
   const saveUser = async() => {
     const status = await userClient.updateUser(profile);
     dispatch(updateCurrentUser(profile));
-    dispatch(setCurrentUser(profile));
+    setProfile(profile);
   }
 
 

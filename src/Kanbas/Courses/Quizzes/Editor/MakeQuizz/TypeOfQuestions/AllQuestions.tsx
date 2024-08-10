@@ -36,7 +36,7 @@ export default function AllQuestions({currentAnswers, answer, setAnswer, addAnsw
 
     
     const aValue = correctFalseAnswer?"False":"True";
-    const TFAnswers = [{_id:"01", type:"Correct Answer", value:{aValue}}] 
+    const TFAnswers = [{_id:"01", type:"Correct Answer", value:aValue}] 
     const dispatch = useDispatch();
 
     const createQuestion = async(question:any) => {

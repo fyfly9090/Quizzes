@@ -9,7 +9,7 @@ import { CgExpand } from "react-icons/cg";
 import { HiOutlineCodeBracket } from "react-icons/hi2";
 import { BsKeyboard } from "react-icons/bs";
 import { GoPlus } from "react-icons/go";
-import { Link, useParams } from "react-router-dom";
+import { Link, redirect, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
 import { addQuiz, updateQuiz } from "../../quizzesReducer";
@@ -82,7 +82,7 @@ export default function QuizUpdates() {
     const [newDue, setNewDue] = useState(due===""? "":due);
     const [newAvailable, setNewAvailable] = useState(available===""? "":available);
     const [newId, setNewId] = useState(params.qid==="0"?"0":params.qid);    
-
+    const navigate = useNavigate();
     const saveQuiz = async(quiz:any) => {
         const status = await client.updateQuiz(quiz);
         dispatch(updateQuiz(quiz));
@@ -91,11 +91,11 @@ export default function QuizUpdates() {
     const createQuiz = async(quiz:any) => {
        const newQuiz = await client.createQuiz(cid as string, quiz);
        dispatch(addQuiz(newQuiz)); 
-       console.log(newQuiz._id)
-       /* console.log(typeof newQuiz._id)
-       console.log(typeof newId) */
-       setNewId(newQuiz._id);
-       console.log(newId);
+  
+       setNewId(prev => prev = newQuiz._id)
+
+       navigate(`/Kanbas/Courses/${cid}/Quizzes/${newQuiz._id}`)
+
     }
 
 
@@ -301,9 +301,9 @@ export default function QuizUpdates() {
                             type: newType, group: newGroup, shuffle: newShuffle, multiple: newMultiple, code: newCode, oneQuestion: newOneQuestion,
                             webcam: newWebcam, lockQustion: newLockQuestion, time: newTime, timeLimit: newTimeLimit, due:newDue, 
                             available:newAvailable});console.log(newId)}}>
-                               <Link key={id} to={`/Kanbas/Courses/${cid}/Quizzes/${newId}`} className="text-decoration-none text-black">
+                               {/* <Link key={id} to={`/Kanbas/Courses/${cid}/Quizzes/${newId}`} className="text-decoration-none text-black"> */}
                                 Save
-                                </Link>
+                                {/* </Link> */}
                     </button>
                     <button className="btn btn-danger" 
                        onClick={()=>{console.log(id);params.qid==="0"? createQuiz({title:newTitle, course: cid, instruction: newInstruction, 

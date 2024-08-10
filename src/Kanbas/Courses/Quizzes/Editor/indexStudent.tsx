@@ -1,12 +1,21 @@
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { useParams } from "react-router-dom"
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import * as client from "./MakeQuizz/client"
+import { setQuestions } from "./MakeQuizz/TypeOfQuestions/questionsReducer";
+import * as userClient from "../../People/client";
 
 export default function StudentQuizDetails() {
-  const { questions } = useSelector((state:any) => state.questionsReducer);
 
-  console.log(questions)
+  const { questions } = useSelector((state:any) => state.questionsReducer);
   const {qid} = useParams();
+  const dispatch = useDispatch();
+
+  const fetchQuestions = async() => {
+    const questions = await client.findQuestionsByQuiz(qid as string);
+    dispatch(setQuestions(questions));
+  }
+ 
   const questionsOfQuiz = questions.filter((q:any) => q.quiz===qid);
   const length = questionsOfQuiz.length;
   const a = 0;
@@ -33,6 +42,7 @@ export default function StudentQuizDetails() {
     setCurrentQuestions(currentQuestions.map((q:any)=>q._id===question._id? question:q))
   }
  
+  console.log(currentQuestions)
   const [stuPoints, setStuPoints] = useState(a);
   const setStudentPoints = () => {
     let points = 0;
@@ -45,10 +55,30 @@ export default function StudentQuizDetails() {
           break;
         }
       }
-      console.log(points)
     }
     setStuPoints(points);
   }
+
+  const userAnswers = [];
+  for(let i = 0; i < currentQuestions.length; i++) {
+    userAnswers.push(currentQuestions[i].studentAnswer?currentQuestions[i].studentAnswer:"");
+  }
+  console.log(userAnswers)
+  
+
+  const saveUser = async () => {
+    const updatedUser = { ...currentUser, quizzesTaken: {} };
+    await userClient.updateUser(updatedUser);
+    /* setUser(updatedUser);
+    fetchUsers(); */
+  };
+  
+  useEffect(()=>{
+    fetchQuestions();
+  }, [])
+
+
+  
   return (
         <div className="mx-5 px-5">
           {(currentUser.role==="FACULTY")&&
@@ -126,4 +156,8 @@ export default function StudentQuizDetails() {
         </div>
   )
 
+}
+
+function dispatch(arg0: any) {
+  throw new Error("Function not implemented.");
 }
