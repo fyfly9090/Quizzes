@@ -81,21 +81,18 @@ export default function QuizUpdates() {
     const [newTimeLimit, setNewTimeLimit] = useState(timeLimit===true? true:timeLimit);
     const [newDue, setNewDue] = useState(due===""? "":due);
     const [newAvailable, setNewAvailable] = useState(available===""? "":available);
-    const [newId, setNewId] = useState(params.qid==="0"?"0":params.qid);    
+
     const navigate = useNavigate();
     const saveQuiz = async(quiz:any) => {
         const status = await client.updateQuiz(quiz);
         dispatch(updateQuiz(quiz));
+        navigate(`/Kanbas/Courses/${cid}/Quizzes/${quiz._id}`)
     }
 
     const createQuiz = async(quiz:any) => {
        const newQuiz = await client.createQuiz(cid as string, quiz);
        dispatch(addQuiz(newQuiz)); 
-  
-       setNewId(prev => prev = newQuiz._id)
-
        navigate(`/Kanbas/Courses/${cid}/Quizzes/${newQuiz._id}`)
-
     }
 
 
@@ -210,7 +207,7 @@ export default function QuizUpdates() {
                             <span className="ms-4">
                               <label htmlFor="ma-1">No. of Multiple Attempts</label>
                               <input className="wd-quiz-multiple" id="ma-1" type="number" value={newMuliTimes}
-                                   onChange={(e)=>setNewMultiTimes(e.target.valueAsNumber)}/>
+                                   onChange={(e)=>{setNewMultiTimes(e.target.valueAsNumber);console.log(e.target.valueAsNumber)}}/>
                             </span>}
                         </div>
                         <div className="mt-2">
@@ -295,23 +292,23 @@ export default function QuizUpdates() {
                     </button>
                     <button className="btn btn-primary me-3" 
                        onClick={()=>{params.qid==="0"? createQuiz({title:newTitle, course: cid, instruction: newInstruction, 
-                        type: newType, group: newGroup, shuffle: newShuffle, multiple: newMultiple, code: newCode, oneQuestion: newOneQuestion,
+                        type: newType, group: newGroup, shuffle: newShuffle, multiple: newMultiple, mul_times:newMuliTimes, code: newCode, oneQuestion: newOneQuestion,
                         webcam: newWebcam, lockQustion: newLockQuestion, time: newTime, timeLimit: newTimeLimit, due:newDue, available:newAvailable}) : 
                         saveQuiz({_id:id, title:newTitle, course: cid, instruction: newInstruction, 
-                            type: newType, group: newGroup, shuffle: newShuffle, multiple: newMultiple, code: newCode, oneQuestion: newOneQuestion,
+                            type: newType, group: newGroup, shuffle: newShuffle, multiple: newMultiple, mul_times:newMuliTimes, code: newCode, oneQuestion: newOneQuestion,
                             webcam: newWebcam, lockQustion: newLockQuestion, time: newTime, timeLimit: newTimeLimit, due:newDue, 
-                            available:newAvailable});console.log(newId)}}>
+                            available:newAvailable})}}>
                                {/* <Link key={id} to={`/Kanbas/Courses/${cid}/Quizzes/${newId}`} className="text-decoration-none text-black"> */}
                                 Save
                                 {/* </Link> */}
                     </button>
                     <button className="btn btn-danger" 
-                       onClick={()=>{console.log(id);params.qid==="0"? createQuiz({title:newTitle, course: cid, instruction: newInstruction, 
-                        type: newType, group: newGroup, shuffle: newShuffle, multiple: newMultiple, code: newCode, oneQuestion: newOneQuestion,
+                       onClick={()=>{params.qid==="0"? createQuiz({title:newTitle, course: cid, instruction: newInstruction, 
+                        type: newType, group: newGroup, shuffle: newShuffle, multiple: newMultiple, mul_times:newMuliTimes, code: newCode, oneQuestion: newOneQuestion,
                         webcam: newWebcam, lockQustion: newLockQuestion, time: newTime, timeLimit: newTimeLimit, due:newDue, available:newAvailable,
                         publish: true}) : 
                         saveQuiz({_id:id, title:newTitle, course: cid, instruction: newInstruction, 
-                            type: newType, group: newGroup, shuffle: newShuffle, multiple: newMultiple, code: newCode, oneQuestion: newOneQuestion,
+                            type: newType, group: newGroup, shuffle: newShuffle, multiple: newMultiple, mul_times:newMuliTimes, code: newCode, oneQuestion: newOneQuestion,
                             webcam: newWebcam, lockQustion: newLockQuestion, time: newTime, timeLimit: newTimeLimit, due:newDue, 
                             available:newAvailable, publish: true})}}>
                                <Link key={id} to={`/Kanbas/Courses/${cid}/Quizzes`} className="text-decoration-none text-black">

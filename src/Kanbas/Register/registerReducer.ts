@@ -16,7 +16,7 @@ const enrollmentsSlice = createSlice ({
 
         addEnrollment: (state,{payload:enrollment}) => {
             const newEnrollment:any = {
-                "_id": new Date().getTime().toString(),
+                "_id": enrollment._id,
                 "user": enrollment.user,
                 "course": enrollment.course,
             }

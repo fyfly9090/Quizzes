@@ -4,22 +4,32 @@ import { useEffect, useState } from "react";
 import * as client from "./MakeQuizz/client"
 import { setQuestions } from "./MakeQuizz/TypeOfQuestions/questionsReducer";
 import * as userClient from "../../People/client";
+import * as quizClient from "./QuizzesTaken/client";
+import { setCurrentQuizzes, updateQuizTaken } from "./QuizzesTaken/quizTakenReducer";
 
 export default function StudentQuizDetails() {
 
   const { questions } = useSelector((state:any) => state.questionsReducer);
+  const { quizzesTaken } = useSelector((state:any) => state.quizTakenReducer);
+  const { currentUser } = useSelector((state:any) => state.accountReducer);
   const {qid} = useParams();
   const dispatch = useDispatch();
+  const uid = currentUser._id;
 
   const fetchQuestions = async() => {
     const questions = await client.findQuestionsByQuiz(qid as string);
     dispatch(setQuestions(questions));
   }
+  const fetchQuizTaken = async() => {
+    const myQuizzes = await quizClient.fetchQuizTaken();
+    dispatch(setCurrentQuizzes(myQuizzes));
+  }
  
+  const inQuiz = quizzesTaken.find((cq:any)=>cq.user===uid&&cq.quiz===qid)
   const questionsOfQuiz = questions.filter((q:any) => q.quiz===qid);
   const length = questionsOfQuiz.length;
   const a = 0;
-  const { currentUser } = useSelector((state:any) => state.accountReducer);
+  
   const[i, setIndex] = useState(a);
   const multipleChoice = (aType:string) => {
       if(aType === "MultipleChoices") {
@@ -42,7 +52,6 @@ export default function StudentQuizDetails() {
     setCurrentQuestions(currentQuestions.map((q:any)=>q._id===question._id? question:q))
   }
  
-  console.log(currentQuestions)
   const [stuPoints, setStuPoints] = useState(a);
   const setStudentPoints = () => {
     let points = 0;
@@ -59,22 +68,20 @@ export default function StudentQuizDetails() {
     setStuPoints(points);
   }
 
-  const userAnswers = [];
+  const userAnswers: any[] = [];
   for(let i = 0; i < currentQuestions.length; i++) {
     userAnswers.push(currentQuestions[i].studentAnswer?currentQuestions[i].studentAnswer:"");
   }
-  console.log(userAnswers)
   
 
-  const saveUser = async () => {
-    const updatedUser = { ...currentUser, quizzesTaken: {} };
-    await userClient.updateUser(updatedUser);
-    /* setUser(updatedUser);
-    fetchUsers(); */
-  };
+ const saveQuizTaken = async(inQuiz:any) => {
+   const status = await quizClient.updateQuizTaken({...inQuiz, answers: userAnswers});
+   dispatch(updateQuizTaken(inQuiz));
+ }
   
   useEffect(()=>{
     fetchQuestions();
+    fetchQuizTaken();
   }, [])
 
 
@@ -99,7 +106,7 @@ export default function StudentQuizDetails() {
                       {multipleChoice(currentQuestions[i].type) &&     
                       <div className="form-check">
                         <input className="form-check-input" type="radio" name="gridRadios" id={ans._id} value={ans.value} 
-                               onClick={()=>updateStudentAnswer({...currentQuestions[i], studentAnswer:ans.value})} 
+                               onClick={()=>{updateStudentAnswer({...currentQuestions[i], studentAnswer:ans.value});saveQuizTaken(inQuiz)}} 
                                checked={ans.value===currentQuestions[i].studentAnswer}
                         />
                         <label className="form-check-label ps-3" htmlFor={ans._id}>
@@ -156,8 +163,4 @@ export default function StudentQuizDetails() {
         </div>
   )
 
-}
-
-function dispatch(arg0: any) {
-  throw new Error("Function not implemented.");
 }

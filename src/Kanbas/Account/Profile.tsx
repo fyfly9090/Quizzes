@@ -27,8 +27,7 @@ export default function Profile() {
   };
   const saveUser = async() => {
     const status = await userClient.updateUser(profile);
-    dispatch(updateCurrentUser(profile));
-    setProfile(profile);
+    /* dispatch(updateCurrentUser(profile)); */
   }
 
 

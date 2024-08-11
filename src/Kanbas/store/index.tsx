@@ -5,6 +5,7 @@ import accountReducer from "../Account/accountReducer";
 import quizzesReducer from "../Courses/Quizzes/quizzesReducer";
 import questionsReducer from "../Courses/Quizzes/Editor/MakeQuizz/TypeOfQuestions/questionsReducer";
 import registerReducer from "../Register/registerReducer";
+import quizTakenReducer from "../Courses/Quizzes/Editor/QuizzesTaken/quizTakenReducer";
 
 const store = configureStore ({
     reducer: {
@@ -14,6 +15,7 @@ const store = configureStore ({
         quizzesReducer,
         questionsReducer,
         registerReducer,
+        quizTakenReducer,
 
     }
 })
