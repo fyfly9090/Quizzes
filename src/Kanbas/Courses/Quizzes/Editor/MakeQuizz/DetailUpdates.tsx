@@ -95,6 +95,16 @@ export default function QuizUpdates() {
        navigate(`/Kanbas/Courses/${cid}/Quizzes/${newQuiz._id}`)
     }
 
+    const createPublishQuiz = async(quiz:any) => {
+        const newQuiz = await client.createQuiz(cid as string, quiz);
+        dispatch(addQuiz(newQuiz)); 
+    
+     }
+
+     const savePublishQuiz = async(quiz:any) => {
+        const status = await client.updateQuiz(quiz);
+        dispatch(updateQuiz(quiz));
+    }
 
 
     return (
@@ -303,11 +313,11 @@ export default function QuizUpdates() {
                                 {/* </Link> */}
                     </button>
                     <button className="btn btn-danger" 
-                       onClick={()=>{params.qid==="0"? createQuiz({title:newTitle, course: cid, instruction: newInstruction, 
+                       onClick={()=>{params.qid==="0"? createPublishQuiz({title:newTitle, course: cid, instruction: newInstruction, 
                         type: newType, group: newGroup, shuffle: newShuffle, multiple: newMultiple, mul_times:newMuliTimes, code: newCode, oneQuestion: newOneQuestion,
                         webcam: newWebcam, lockQustion: newLockQuestion, time: newTime, timeLimit: newTimeLimit, due:newDue, available:newAvailable,
                         publish: true}) : 
-                        saveQuiz({_id:id, title:newTitle, course: cid, instruction: newInstruction, 
+                        savePublishQuiz({_id:id, title:newTitle, course: cid, instruction: newInstruction, 
                             type: newType, group: newGroup, shuffle: newShuffle, multiple: newMultiple, mul_times:newMuliTimes, code: newCode, oneQuestion: newOneQuestion,
                             webcam: newWebcam, lockQustion: newLockQuestion, time: newTime, timeLimit: newTimeLimit, due:newDue, 
                             available:newAvailable, publish: true})}}>

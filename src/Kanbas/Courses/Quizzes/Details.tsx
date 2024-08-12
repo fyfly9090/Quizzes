@@ -1,11 +1,41 @@
 import { TiPencil } from "react-icons/ti";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import * as client from "./Editor/QuizzesTaken/client";
+import { setCurrentQuizzes, addQuizTaken } from "./Editor/QuizzesTaken/quizTakenReducer";
+import { useEffect } from "react";
 
 export default function QuizzesDetails () {
     const {cid, qid} = useParams();
     const  { quizzes } = useSelector((state:any) => state.quizzesReducer);
+
+    const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { currentUser } = useSelector((state:any) => state.accountReducer);
+   const { quizzesTaken } = useSelector((state:any) => state.quizTakenReducer);
+
+   const quiz = quizzes.find((q:any)=>q._id===qid); 
+   const uid = currentUser._id;
+   const maxiAttempts = quiz?quiz.mul_times:0;
+
+   const fetchQuizTaken = async() => {
+     const myQuizzes = await client.fetchQuizTaken();
+     dispatch(setCurrentQuizzes(myQuizzes));
+   }
+
+   const createQuizTaken = async(quizTaken:any) => {
+     const status = await client.createQuizTaken(quizTaken);
+     dispatch(addQuizTaken(quizTaken));
+     navigate(`/Kanbas/Courses/${cid}/Quizzes/${qid}/preview`)
+
+   }
+
+   useEffect(()=> {
+    fetchQuizTaken();
+  },[])
+
     const ConvertToDate = (date:any) =>{
       if(date instanceof Date) {
         return date;
@@ -13,6 +43,7 @@ export default function QuizzesDetails () {
         return new Date(date);
       }
     }
+    
     return (
         <div className="ms-5 pe-0">
           {quizzes
@@ -22,7 +53,7 @@ export default function QuizzesDetails () {
               <div className="row text-nowrap quizz-control-border pb-4">
                 <div className="col-6 label-element pe-1">
                   <Link key={quiz._id} to={`/Kanbas/Courses/${cid}/Quizzes/${quiz._id}/preview`}>
-                    <button className="btn btn-lg btn-secondary-butt py-1">
+                    <button className="btn btn-lg btn-secondary-butt py-1" onClick = {() => createQuizTaken({quiz:qid, user:currentUser._id, attempts: 0})}>
                       Preview</button>
                   </Link>  
                 </div>

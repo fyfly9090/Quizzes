@@ -1,9 +1,8 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom"
-import { Link } from "react-router-dom";
 import * as client from "./Editor/QuizzesTaken/client";
 import {setCurrentQuizzes, addQuizTaken, updateQuizTaken} from "./Editor/QuizzesTaken/quizTakenReducer";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 export default function DetailsStudent() {
   const dispatch = useDispatch();
@@ -23,7 +22,11 @@ export default function DetailsStudent() {
      const myQuizzes = await client.fetchQuizTaken();
      dispatch(setCurrentQuizzes(myQuizzes));
    }
-   const currentQuiz = quizzesTaken.find((cq:any)=>cq.user===uid&&cq.quiz===qid)
+   const currentQuiz = quizzesTaken.find((cq:any)=>cq.user===uid&&cq.quiz===qid);
+   const userAttempts = currentQuiz?currentQuiz.attempts:0;
+
+   console.log(maxiAttempts)
+   console.log(userAttempts)
 
    const createQuizTaken = async(quizTaken:any) => {
      const status = await client.createQuizTaken(quizTaken);
@@ -48,13 +51,10 @@ export default function DetailsStudent() {
  
    return (
     <div className="align-center pt-5">
-        <button className="btn btn-danger mt-3 align-center p-3 px-5" onClick = {()=>maxiAttempts<currentQuiz.attempts?maxiout():(currentQuiz?
+        <button className="btn btn-danger mt-3 align-center p-3 px-5" onClick = {()=>maxiAttempts<=userAttempts?maxiout():(currentQuiz?
           saveQuizTaken({...currentQuiz, attempts: currentQuiz.attempts+1 }):
           createQuizTaken({quiz:qid, user:currentUser._id, attempts: 1}))}>
-         {/*  <Link className= "text-decoration-none text-white font-size-xx-large" key={qid} 
-          to={`/Kanbas/Courses/${cid}/Quizzes/${qid}/edit`}> */}
             Take the Quiz
-         {/*  </Link> */}
         </button>
     </div>
    ) 

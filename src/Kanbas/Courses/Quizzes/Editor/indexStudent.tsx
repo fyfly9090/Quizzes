@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom"
 import { useEffect, useState } from "react";
 import * as client from "./MakeQuizz/client"
 import { setQuestions } from "./MakeQuizz/TypeOfQuestions/questionsReducer";
-import * as userClient from "../../People/client";
 import * as quizClient from "./QuizzesTaken/client";
 import { setCurrentQuizzes, updateQuizTaken } from "./QuizzesTaken/quizTakenReducer";
 
@@ -14,20 +13,23 @@ export default function StudentQuizDetails() {
   const { currentUser } = useSelector((state:any) => state.accountReducer);
   const {qid} = useParams();
   const dispatch = useDispatch();
-  const uid = currentUser._id;
 
+  const [currentQuestions, setCurrentQuestions] = useState(questions.filter((q:any) => q.quiz===qid));
+  const [inQuiz, setInQuiz] = useState<any>();
   const fetchQuestions = async() => {
     const questions = await client.findQuestionsByQuiz(qid as string);
+    setCurrentQuestions(questions.filter((q:any) => q.quiz===qid))
     dispatch(setQuestions(questions));
+
   }
   const fetchQuizTaken = async() => {
-    const myQuizzes = await quizClient.fetchQuizTaken();
-    dispatch(setCurrentQuizzes(myQuizzes));
+    const quizzesTaken = await quizClient.fetchQuizTaken();
+    setInQuiz(quizzesTaken.find((qt:any) => qt.user===currentUser._id&&qt.quiz===qid));
+    dispatch(setCurrentQuizzes(quizzesTaken));
   }
  
-  const inQuiz = quizzesTaken.find((cq:any)=>cq.user===uid&&cq.quiz===qid)
-  const questionsOfQuiz = questions.filter((q:any) => q.quiz===qid);
-  const length = questionsOfQuiz.length;
+  console.log(inQuiz)
+  const length = currentQuestions.length;
   const a = 0;
   
   const[i, setIndex] = useState(a);
@@ -47,11 +49,12 @@ export default function StudentQuizDetails() {
       }
   }
 
-  const [currentQuestions, setCurrentQuestions] = useState(questionsOfQuiz);
+
   const updateStudentAnswer = (question:any) => {
     setCurrentQuestions(currentQuestions.map((q:any)=>q._id===question._id? question:q))
   }
  
+
   const [stuPoints, setStuPoints] = useState(a);
   const setStudentPoints = () => {
     let points = 0;
@@ -69,12 +72,14 @@ export default function StudentQuizDetails() {
   }
 
   const userAnswers: any[] = [];
+  const setUserAnswers = () => {
   for(let i = 0; i < currentQuestions.length; i++) {
     userAnswers.push(currentQuestions[i].studentAnswer?currentQuestions[i].studentAnswer:"");
   }
-  
+ }
 
  const saveQuizTaken = async(inQuiz:any) => {
+   setUserAnswers();
    const status = await quizClient.updateQuizTaken({...inQuiz, answers: userAnswers});
    dispatch(updateQuizTaken(inQuiz));
  }
@@ -106,7 +111,7 @@ export default function StudentQuizDetails() {
                       {multipleChoice(currentQuestions[i].type) &&     
                       <div className="form-check">
                         <input className="form-check-input" type="radio" name="gridRadios" id={ans._id} value={ans.value} 
-                               onClick={()=>{updateStudentAnswer({...currentQuestions[i], studentAnswer:ans.value});saveQuizTaken(inQuiz)}} 
+                               onClick={()=>{updateStudentAnswer({...currentQuestions[i], studentAnswer:ans.value})}} 
                                checked={ans.value===currentQuestions[i].studentAnswer}
                         />
                         <label className="form-check-label ps-3" htmlFor={ans._id}>
@@ -155,8 +160,10 @@ export default function StudentQuizDetails() {
                 </fieldset>
             </div>
             <div className="width-adj">
-                <button className="btn btn-secondary" onClick={()=>{setIndex(i-1<0?0:i-1);setStudentPoints()}}>Previous</button>    
-                <button className="btn btn-danger float-end" onClick={()=>{setIndex(i+1>length-1?length-1:i+1);setStudentPoints()}} >Next</button>
+                <button className="btn btn-secondary" onClick={()=>{setIndex(i-1<0?0:i-1);setStudentPoints()}}>Previous</button>  
+                <button className="btn btn-danger float-end ms-2">Exit</button>  
+                <button className="btn btn-primary float-end" onClick={()=>{setIndex(i+1>length-1?length-1:i+1);setStudentPoints()}} >Next</button>
+               
             </div> 
             </>
             }
