@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
     quizzesTaken: [],
+    quizTaken: [],
 };
 
 const quizTakenSlice = createSlice({
@@ -10,14 +11,17 @@ const quizTakenSlice = createSlice({
         setCurrentQuizzes: (state, action) => {
             state.quizzesTaken = action.payload;
         },
+        setCurrentQuiz: (state, {payload:quizTaken}) => {
+
+        },
         addQuizTaken: (state, {payload:quizTaken}) => {
             const newQuizTaken: any = {
-                "_id": quizTaken._id,
-                "user": quizTaken.user,
-                "quiz": quizTaken.quiz,
-                "attempts": quizTaken.attempts,
-                "score": quizTaken.score,
-                "answer": quizTaken.answers,
+                _id: quizTaken._id,
+                user: quizTaken.user,
+                quiz: quizTaken.quiz,
+                attempts: quizTaken.attempts,
+                score: quizTaken.score,
+                answers: quizTaken.answers,
             }
             state.quizzesTaken = [...state.quizzesTaken, newQuizTaken] as any;
         },

@@ -58,6 +58,7 @@ export default function Quizzes () {
 
     const contextMenuClose = () => setContextMenu(initialContextMenu);
    
+
     useEffect(()=> {
       fetchQuizzes();
       fetchProfile ();
@@ -90,6 +91,7 @@ export default function Quizzes () {
                         {quiz.title} </Link>
                         <div>
                           <span className="assignment-date d-flex">
+                            
                             <span className="text-danger space-ele-right">{new Date(quiz.due).getTime()<new Date().getTime()? "Closed":
                             (new Date(quiz.available).getTime()<new Date().getTime() && new Date(quiz.due).getTime()>new Date().getTime() ?
                             "Available":`Not available until ${ConvertToDate(quiz.available).toLocaleString('default', {month:'long'})} 
@@ -106,6 +108,10 @@ export default function Quizzes () {
                               {ConvertToDate(quiz.due).getFullYear()} {"at"} {"11:59PM"}</span>| 
                             <span className="space-ele-left space-sm-right">{quiz.points===0?"0":quiz.points}{" "}pts</span>|
                             <span className="space-ele-left">{quiz.noOfQuestions===0?"0":quiz.noOfQuestions}{" "}question(s)</span>
+                          
+                            {currentUser.role==="STUDENT"&& <span className="space-ele-left">
+                              Scores: 0 out of {quiz.points.toString()}{" "}points</span>}
+                            
                           </span> 
                         </div> 
                       </span>

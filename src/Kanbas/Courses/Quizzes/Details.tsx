@@ -3,8 +3,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import * as client from "./Editor/QuizzesTaken/client";
+import * as questionclient from "./Editor/MakeQuizz/client"
 import { setCurrentQuizzes, addQuizTaken } from "./Editor/QuizzesTaken/quizTakenReducer";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { setQuestions } from "./Editor/MakeQuizz/TypeOfQuestions/questionsReducer";
 
 export default function QuizzesDetails () {
     const {cid, qid} = useParams();
@@ -16,24 +18,38 @@ export default function QuizzesDetails () {
   const { currentUser } = useSelector((state:any) => state.accountReducer);
    const { quizzesTaken } = useSelector((state:any) => state.quizTakenReducer);
 
-   const quiz = quizzes.find((q:any)=>q._id===qid); 
-   const uid = currentUser._id;
-   const maxiAttempts = quiz?quiz.mul_times:0;
+   const currentQuiz = quizzesTaken?quizzesTaken.filter((qt:any)=>qt.quiz===qid&&qt.user===currentUser._id):{};
+  
+   const { questions } = useSelector((state:any) => state.questionsReducer);
+   const [currentQuestions, setCurrentQuestions] = useState(questions.filter((q:any) => q.quiz===qid));
+   const fetchQuestions = async() => {
+    const questions = await questionclient.findQuestionsByQuiz(qid as string);
+    setCurrentQuestions(questions.filter((q:any) => q.quiz===qid))
+    dispatch(setQuestions(questions));
+  }
+  let newAnswers = Array() as string[];
+   for(let i = 0; i < currentQuestions.length; i++) {
+     newAnswers.push("");
+   }
 
    const fetchQuizTaken = async() => {
-     const myQuizzes = await client.fetchQuizTaken();
-     dispatch(setCurrentQuizzes(myQuizzes));
+     const quizzesTaken = await client.fetchQuizTaken();
+     dispatch(setCurrentQuizzes(quizzesTaken));
    }
 
    const createQuizTaken = async(quizTaken:any) => {
-     const status = await client.createQuizTaken(quizTaken);
+    console.log(quizTaken);
+     const status = await client.createQuizTaken({...quizTaken, answers:newAnswers});
+     
      dispatch(addQuizTaken(quizTaken));
-     navigate(`/Kanbas/Courses/${cid}/Quizzes/${qid}/preview`)
+     
+     /* navigate(`/Kanbas/Courses/${cid}/Quizzes/${qid}/preview`) */
 
    }
 
    useEffect(()=> {
     fetchQuizTaken();
+    fetchQuestions();
   },[])
 
     const ConvertToDate = (date:any) =>{
@@ -53,7 +69,8 @@ export default function QuizzesDetails () {
               <div className="row text-nowrap quizz-control-border pb-4">
                 <div className="col-6 label-element pe-1">
                   <Link key={quiz._id} to={`/Kanbas/Courses/${cid}/Quizzes/${quiz._id}/preview`}>
-                    <button className="btn btn-lg btn-secondary-butt py-1" onClick = {() => createQuizTaken({quiz:qid, user:currentUser._id, attempts: 0})}>
+                    <button className="btn btn-lg btn-secondary-butt py-1" onClick = {() => currentQuiz.length===0?
+                      createQuizTaken({quiz:qid, user:currentUser._id, attempts: 0, score:0, answers:newAnswers}):""}>
                       Preview</button>
                   </Link>  
                 </div>

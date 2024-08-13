@@ -1,21 +1,31 @@
 import { useDispatch, useSelector } from "react-redux"
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { useEffect, useState } from "react";
 import * as client from "./MakeQuizz/client"
 import { setQuestions } from "./MakeQuizz/TypeOfQuestions/questionsReducer";
 import * as quizClient from "./QuizzesTaken/client";
 import { setCurrentQuizzes, updateQuizTaken } from "./QuizzesTaken/quizTakenReducer";
+import { setCurrentQuiz } from "./QuizzesTaken/inQuizReducer";
 
 export default function StudentQuizDetails() {
 
   const { questions } = useSelector((state:any) => state.questionsReducer);
   const { quizzesTaken } = useSelector((state:any) => state.quizTakenReducer);
   const { currentUser } = useSelector((state:any) => state.accountReducer);
-  const {qid} = useParams();
+  const { quizTaken } = useSelector((state:any) => state.quizTakenReducer);
+  const {qid} = useParams() as { qid: string};
+  const {cid} = useParams();
+  const uid = currentUser._id;
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [currentQuestions, setCurrentQuestions] = useState(questions.filter((q:any) => q.quiz===qid));
-  const [inQuiz, setInQuiz] = useState<any>();
+  const [inQuiz, setInQuiz] = useState(quizzesTaken.filter((qt:any) => qt.quiz===qid&&qt.user==uid));
+  const length = currentQuestions.length;
+  const a = 0;
+
+
+
   const fetchQuestions = async() => {
     const questions = await client.findQuestionsByQuiz(qid as string);
     setCurrentQuestions(questions.filter((q:any) => q.quiz===qid))
@@ -24,13 +34,20 @@ export default function StudentQuizDetails() {
   }
   const fetchQuizTaken = async() => {
     const quizzesTaken = await quizClient.fetchQuizTaken();
-    setInQuiz(quizzesTaken.find((qt:any) => qt.user===currentUser._id&&qt.quiz===qid));
     dispatch(setCurrentQuizzes(quizzesTaken));
+    const quizTaken = quizzesTaken.find((qt:any)=>qt.user===uid&&qt.quiz===qid);
+    dispatch(setCurrentQuiz(quizTaken));
+    setInQuiz(quizTaken);
+
+    setUserOldAnswers(quizTaken?quizTaken.answers:[]);
+    console.log(quizTaken);
+    console.log(inQuiz);
+
   }
- 
-  console.log(inQuiz)
-  const length = currentQuestions.length;
-  const a = 0;
+  
+  const [userOldAnswers, setUserOldAnswers] = useState<any>([]);
+  
+  
   
   const[i, setIndex] = useState(a);
   const multipleChoice = (aType:string) => {
@@ -49,20 +66,14 @@ export default function StudentQuizDetails() {
       }
   }
 
-
-  const updateStudentAnswer = (question:any) => {
-    setCurrentQuestions(currentQuestions.map((q:any)=>q._id===question._id? question:q))
-  }
- 
-
+  console.log(currentQuestions)
   const [stuPoints, setStuPoints] = useState(a);
   const setStudentPoints = () => {
     let points = 0;
     for(let i = 0; i <currentQuestions.length; i++ ) {
       const answers = currentQuestions[i].answers;
       for(let j = 0; j < answers.length; j++) {
-        
-        if(answers[j].type==="Correct Answer" && currentQuestions[i].studentAnswer===answers[j].value) {
+        if(answers[j].type==="Correct Answer" && userOldAnswers[i]===answers[j].value) {
           points=points+parseInt(currentQuestions[i].points);
           break;
         }
@@ -70,6 +81,7 @@ export default function StudentQuizDetails() {
     }
     setStuPoints(points);
   }
+  console.log(userOldAnswers)
 
   const userAnswers: any[] = [];
   const setUserAnswers = () => {
@@ -78,11 +90,23 @@ export default function StudentQuizDetails() {
   }
  }
 
+ const updateStudentAnswer = (answer:any, i:number) => {
+  /* setCurrentQuestions(currentQuestions.map((q:any)=>q._id===question._id? question:q)) */
+  let newAnswer = [...userOldAnswers];
+  newAnswer[i] = answer;
+  setUserOldAnswers(newAnswer);
+  setInQuiz({...inQuiz,answers:userOldAnswers})
+}
+
+
  const saveQuizTaken = async(inQuiz:any) => {
    setUserAnswers();
-   const status = await quizClient.updateQuizTaken({...inQuiz, answers: userAnswers});
+   const status = await quizClient.updateQuizTaken({...inQuiz, answers: userOldAnswers});
+   console.log(inQuiz);
    dispatch(updateQuizTaken(inQuiz));
+   navigate(`/Kanbas/Courses/${cid}/Quizzes`)
  }
+
   
   useEffect(()=>{
     fetchQuestions();
@@ -90,7 +114,6 @@ export default function StudentQuizDetails() {
   }, [])
 
 
-  
   return (
         <div className="mx-5 px-5">
           {(currentUser.role==="FACULTY")&&
@@ -111,8 +134,8 @@ export default function StudentQuizDetails() {
                       {multipleChoice(currentQuestions[i].type) &&     
                       <div className="form-check">
                         <input className="form-check-input" type="radio" name="gridRadios" id={ans._id} value={ans.value} 
-                               onClick={()=>{updateStudentAnswer({...currentQuestions[i], studentAnswer:ans.value})}} 
-                               checked={ans.value===currentQuestions[i].studentAnswer}
+                               onClick={()=>{updateStudentAnswer(ans.value, i)}} 
+                               checked={ans.value===userOldAnswers[i]}
                         />
                         <label className="form-check-label ps-3" htmlFor={ans._id}>
                             {ans.value}
@@ -128,17 +151,17 @@ export default function StudentQuizDetails() {
                       <>
                         <div className="form-check">
                           <input className="form-check-input" type="radio" name="gridRadios" id="rs1" value="true"
-                                  onClick={()=>updateStudentAnswer({...currentQuestions[i], studentAnswer:"True"})
+                                  onClick={()=>updateStudentAnswer("True", i)
                                                 } 
-                                  checked={"True"===currentQuestions[i].studentAnswer}
+                                  checked={"True"===userOldAnswers[i]}
                           />
                           <label className="form-check-label ps-3" htmlFor="rs1">True</label>
                         </div> 
                         <div className="form-check">
                           <input className="form-check-input" type="radio" name="gridRadios" id="rs2" value="false"
-                                 onClick={()=>updateStudentAnswer({...currentQuestions[i], studentAnswer:"False"})
+                                 onClick={()=>updateStudentAnswer("False", i)
                                                } 
-                                 checked={"False"===currentQuestions[i].studentAnswer}
+                                 checked={"False"===userOldAnswers[i]}
                           />
                           <label className="form-check-label ps-3" htmlFor="rs2">False</label>
                         </div>
@@ -151,9 +174,9 @@ export default function StudentQuizDetails() {
                          Your Answer </label>
                         <div className="col-sm-10">
                           <input className="form-control" id="r1" 
-                          onChange={(e)=> updateStudentAnswer({...currentQuestions[i], studentAnswer:e.target.value})
+                          onChange={(e)=> updateStudentAnswer(e.target.value, i)
                                            }
-                          value={currentQuestions[i].studentAnswer}/>
+                          value={userOldAnswers[i]}/>
                         </div>
                     </div>
                     }
@@ -161,9 +184,8 @@ export default function StudentQuizDetails() {
             </div>
             <div className="width-adj">
                 <button className="btn btn-secondary" onClick={()=>{setIndex(i-1<0?0:i-1);setStudentPoints()}}>Previous</button>  
-                <button className="btn btn-danger float-end ms-2">Exit</button>  
+                <button className="btn btn-danger float-end ms-2" onClick={()=>saveQuizTaken({...inQuiz})}>Exit</button>  
                 <button className="btn btn-primary float-end" onClick={()=>{setIndex(i+1>length-1?length-1:i+1);setStudentPoints()}} >Next</button>
-               
             </div> 
             </>
             }
